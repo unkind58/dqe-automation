@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        POSTGRES_SECRET_USR = credentials('POSTGRES_SECRET_USR')
+        POSTGRES_SECRET_PSW = credentials('POSTGRES_SECRET_PSW')
+    }
+
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Pytest') {
+            steps {
+                sh '''
+                pytest tests -m "parquet_data" \
+                    --db_host="postgres" \
+                    --db_port="5432" \
+                    --db_name="mydatabase" \
+                    --db_user=$POSTGRES_SECRET_USR \
+                    --db_password=$POSTGRES_SECRET_PSW \
+                    --html=html_report/report.html
+                '''
+            }
+        }
+
+        stage('Archive Test Report') {
+            steps {
+                // Archive the entire html_report directory, including assets
+                archiveArtifacts artifacts: 'html_report/**', allowEmptyArchive: true
+
+                // Publish the HTML report
+                publishHTML(target: [
+                    allowMissing: false,  // Fail the pipeline if the report is missing
+                    keepAll: true,        // Keep all reports from previous runs
+                    reportDir: 'html_report', // Directory path for the report
+                    reportFiles: 'report.html', // Entry point file (change to 'index.html' if needed)
+                    reportName: 'HTML Test Report' // Display name in Jenkins
+                ])
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs for details.'
+        }
+    }
+}

@@ -22,7 +22,7 @@ class DataQualityLibrary:
         df1.count = df2.count
 
     @staticmethod
-    def check_data_full_data_set(df1, df2):
+    def check_data_completeness(df1, df2):
         df1 = df2
 
     @staticmethod
@@ -31,5 +31,5 @@ class DataQualityLibrary:
 
     @staticmethod
     def check_not_null_values(df, column_names=None):
-        col for df.column_names:
+        for col in df.column_names:
             col.not_null
