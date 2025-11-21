@@ -7,21 +7,24 @@ pipeline {
     }
 
     stages {
-		stage('Install Dependencies') {
-			steps {
-				sh '''
-					python3 -m venv .venv
-					. .venv/bin/activate
-					pip install --upgrade pip
-					pip install -r "PyTest DQ Framework/requirements.txt"
-				'''
-			}
-		}
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    cd "PyTest DQ Framework"
+                    python3 -m venv .venv
+                    . .venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
+            }
+        }
 
         stage('Run Pytest') {
             steps {
                 sh '''
-                pytest tests -m "parquet_data" \
+                    cd "PyTest DQ Framework"
+                    . .venv/bin/activate
+                    pytest tests -m "parquet_data" \
                     --db_host="postgres" \
                     --db_port="5432" \
                     --db_name="mydatabase" \
@@ -35,13 +38,13 @@ pipeline {
         stage('Archive Test Report') {
             steps {
                 // Archive the entire html_report directory, including assets
-                archiveArtifacts artifacts: 'html_report/**', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'PyTest DQ Framework/html_report/**', allowEmptyArchive: true
 
                 // Publish the HTML report
                 publishHTML(target: [
                     allowMissing: false,  // Fail the pipeline if the report is missing
                     keepAll: true,        // Keep all reports from previous runs
-                    reportDir: 'html_report', // Directory path for the report
+                    reportDir: 'PyTest DQ Framework/html_report', // Correct directory path
                     reportFiles: 'report.html', // Entry point file (change to 'index.html' if needed)
                     reportName: 'HTML Test Report' // Display name in Jenkins
                 ])
