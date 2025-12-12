@@ -3,7 +3,7 @@ import pandas as pd
 
 # Fixture to read the CSV file
 @pytest.fixture(scope="session")
-def df(path_to_file='../src/data/data.csv'):
+def df(path_to_file='src/data/data.csv'):
     """
     Loads a CSV file into a pandas DataFrame.
     """
